@@ -1,0 +1,240 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
+public class PlayerScript : MonoBehaviour
+{
+    private Rigidbody2D rd2d;
+    public Text countText;
+    public Text winText;
+    public Text livesText;
+    public int level;
+    public float speed;
+  
+    private int scoreValue = 0;
+    public static int count;
+    public static int lives;
+    public static bool gameOver;
+    public AudioClip music1;
+    public AudioClip music2;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        AudioSource.PlayClipAtPoint(music1, transform.position);
+        rd2d = GetComponent<Rigidbody2D>();
+        countText.text = scoreValue.ToString();
+        winText.text = "";
+
+        if (level == 1)
+        {
+            count = 0;
+           
+        }
+        lives = 3;
+
+        SetCountText();
+        SetLivesText();
+
+    }
+
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        float hozMovement = Input.GetAxis("Horizontal");
+        float vertMovement = Input.GetAxis("Vertical");
+
+        if (Input.GetKey("escape"))
+        {
+            Application.Quit();
+        }
+        if (!gameOver)
+        {
+            rd2d.AddForce(new Vector2(hozMovement * speed, vertMovement * speed));
+        }
+
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Coin") & !gameOver)
+        {
+            collision.gameObject.SetActive(false);
+            count += 1;
+            SetCountText();
+        }
+        if (collision.gameObject.CompareTag("Enemy") & !gameOver)
+        {
+            collision.gameObject.SetActive(false);
+            lives -= 1;
+            SetLivesText();
+
+            if (lives <= 0)
+            {
+                winText.text = "<b>You Lose!</b>";
+                gameOver = true;
+               
+            }
+        }
+       
+    }
+            
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.collider.tag == "Ground")
+        {
+            if (Input.GetKey(KeyCode.W)&& !gameOver)
+            {
+                rd2d.AddForce(new Vector2(0, 3), ForceMode2D.Impulse);
+            }
+        }
+    }
+
+    void SetCountText()
+    {
+        countText.text = "<i>Count: " + count.ToString() + "</i>";
+        if (level == 1 & count >= 4)
+        {
+            SceneManager.LoadScene("Level 2");
+        }
+        if (level == 2 & count >= 8)
+        {
+             winText.text = "<b>You Win! Game created by Brynn Jones!</b>";
+             gameOver = true;
+            AudioSource.
+            AudioSource.PlayClipAtPoint(music2, transform.position);
+        }
+    }
+    void SetLivesText()
+    {
+        livesText.text = "<i>Lives: " + lives.ToString() + "</i>";
+    }
+}
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CameraController : MonoBehaviour
+{ 
+    public GameObject target;
+
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        
+    }
+
+    // Update is called once per frame
+    void LateUpdate()
+    {
+
+    this.transform.position = new Vector3(target.transform.position.x, this.transform.position.y, this.transform.position.z);
+
+        
+    }
+}using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyScript : MonoBehaviour
+{
+    // Start is called before the first frame update
+    void Start()
+    {
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        transform.Rotate(new Vector3(0, 0, 45) * Time.deltaTime);
+    }
+    public float speed;
+    private string direction = "right";
+
+    void FixedUpdate()
+    {
+        if (!PlayerScript.gameOver)
+        {
+            if (direction == "right")
+            {
+                if (transform.position.x != 6.36f)
+                {
+                    transform.position = Vector2.MoveTowards(transform.position, new Vector2(6.36f, transform.position.y), speed * Time.deltaTime);
+                }
+                else
+                {
+                    direction = "left";
+                }
+            }
+            else
+            {
+                if (transform.position.x != -3.5f)
+                {
+                    transform.position = Vector2.MoveTowards(transform.position, new Vector2(-3.5f, transform.position.y), speed * Time.deltaTime);
+                }
+                else
+                {
+                    direction = "right";
+                }
+            }
+
+        }
+       
+    }
+
+
+}
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyScriptVertical : MonoBehaviour
+{
+    public float speed;
+    private string direction = "up";
+    // Start is called before the first frame update
+    void Start()
+    {
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        transform.Rotate(new Vector3(0, 0, 45) * Time.deltaTime);
+    }
+
+    void FixedUpdate()
+    {
+        if (!PlayerScript.gameOver)
+        {
+            if (direction == "up")
+            {
+                if (transform.position.y != 8.33f)
+                {
+                    transform.position = Vector2.MoveTowards(transform.position, new Vector2(transform.position.x, 8.33f), speed * Time.deltaTime);
+                }
+                else
+                {
+                    direction = "down";
+                }
+            }
+            else
+            {
+                if (transform.position.y != -0.66f)
+                {
+                    transform.position = Vector2.MoveTowards(transform.position, new Vector2(transform.position.x, -0.66f), speed * Time.deltaTime);
+                }
+                else
+                {
+                    direction = "up";
+                }
+            }
+
+        }
+        
+    }
+}
